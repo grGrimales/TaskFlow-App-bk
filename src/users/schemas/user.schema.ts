@@ -1,9 +1,13 @@
 // src/users/schemas/user.schema.ts
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
-import { Document } from 'mongoose';
+import { Document, Types } from 'mongoose';
 
 @Schema({ timestamps: true })
 export class User extends Document {
+
+    declare _id: Types.ObjectId;
+
+   
   @Prop({ required: true })
   name: string;
 
@@ -12,6 +16,9 @@ export class User extends Document {
 
   @Prop({ required: true })
   password: string;
+
+  @Prop({ required: false }) 
+  currentHashedRefreshToken?: string;
 
   @Prop({ type: [String], default: ['user'] })
   roles: string[];

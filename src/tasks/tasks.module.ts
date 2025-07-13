@@ -7,6 +7,7 @@ import { MongooseModule } from '@nestjs/mongoose';
 import { Task, TaskSchema } from './schemas/task.schema';
 import { Column, ColumnSchema } from '../columns/schemas/column.schema';
 import { Board, BoardSchema } from '../boards/schemas/board.schema';
+import { LabelsModule } from 'src/labels/labels.module';
 
 @Module({
   imports: [
@@ -15,6 +16,7 @@ import { Board, BoardSchema } from '../boards/schemas/board.schema';
       { name: Column.name, schema: ColumnSchema },
       { name: Board.name, schema: BoardSchema },
     ]),
+    LabelsModule
   ],
   // Registrar ambos controladores
   controllers: [TasksController, TaskActionsController],

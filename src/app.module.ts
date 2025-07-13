@@ -7,6 +7,8 @@ import { UsersModule } from './users/users.module';
 import { BoardsModule } from './boards/boards.module';
 import { ColumnsModule } from './columns/columns.module';
 import { TasksModule } from './tasks/tasks.module';
+import { CommentsModule } from './comments/comments.module';
+import { LabelsModule } from './labels/labels.module';
 
 
 @Module({
@@ -26,6 +28,8 @@ import { TasksModule } from './tasks/tasks.module';
     BoardsModule,
     ColumnsModule,
     TasksModule,
+    CommentsModule,
+    LabelsModule,
   ],
   controllers: [],
   providers: [],

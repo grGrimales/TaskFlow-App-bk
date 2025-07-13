@@ -28,4 +28,12 @@ getProfile(@Request() req) {
   // Gracias a la estrategia JWT, req.user contiene los datos del usuario
   return req.user;
 }
+
+  @Post('refresh')
+  async refreshToken(@Body() body: { userId: string; refreshToken: string }) {
+    if (!body.userId || !body.refreshToken) {
+        throw new Error('UserId y RefreshToken son requeridos');
+    }
+    return this.authService.refreshToken(body.userId, body.refreshToken);
+  }
 }

@@ -16,7 +16,7 @@ export class TasksService {
     @InjectModel(Task.name) private taskModel: Model<Task>,
     @InjectModel(Column.name) private columnModel: Model<Column>,
     @InjectModel(Board.name) private boardModel: Model<Board>,
-  ) {}
+  ) { }
 
   async create(columnId: string, createTaskDto: CreateTaskDto, userId: string): Promise<Task> {
     const column = await this.columnModel.findById(columnId);
@@ -33,7 +33,7 @@ export class TasksService {
       ...createTaskDto,
       column: columnId,
     });
-    
+
     await newTask.save();
 
     column.tasks.push(newTask);
@@ -45,24 +45,44 @@ export class TasksService {
   async update(taskId: string, updateTaskDto: UpdateTaskDto, userId: string): Promise<Task> {
     const task = await this.taskModel.findById(taskId).populate({
       path: 'column',
-      populate: { path: 'board', model: 'Board' }
+      select: 'board', // Solo necesitamos el ID del tablero
+      populate: {
+        // labels
+        path: 'board',
+        model: 'Board',
+        select: 'owner members' // Traemos al dueño y a los miembros
+      },
+      
+      
+
     });
 
     if (!task) {
       throw new NotFoundException(`Tarea con ID "${taskId}" no encontrada.`);
     }
 
-    const boardOwnerId = (task.column as any)?.board?.owner?.toString();
-    if (!boardOwnerId || boardOwnerId !== userId) {
+    // Lógica de permisos mejorada
+    const board = (task.column as any)?.board;
+    if (!board) {
+      throw new NotFoundException('El tablero asociado a esta tarea no fue encontrado.');
+    }
+    const isOwner = board.owner.toString() === userId;
+    const isMember = board.members.some(memberId => memberId.toString() === userId);
+
+    if (!isOwner && !isMember) {
       throw new UnauthorizedException('No tienes permiso para modificar esta tarea.');
     }
-    
+
+    // Esta es la línea clave. Actualiza la tarea con todos los datos del DTO.
     const updatedTask = await this.taskModel.findByIdAndUpdate(taskId, updateTaskDto, { new: true }).exec();
+    
+
     if (!updatedTask) {
       throw new NotFoundException(`Tarea con ID "${taskId}" no encontrada durante la actualización.`);
     }
     return updatedTask;
   }
+
 
   async remove(taskId: string, userId: string): Promise<{ message: string }> {
     const task = await this.taskModel.findById(taskId).populate({
@@ -78,7 +98,7 @@ export class TasksService {
     if (!boardOwnerId || boardOwnerId !== userId) {
       throw new UnauthorizedException('No tienes permiso para eliminar esta tarea.');
     }
-    
+
     const columnId = task.column._id;
     await this.taskModel.findByIdAndDelete(taskId);
     await this.columnModel.findByIdAndUpdate(columnId, { $pull: { tasks: taskId } });
@@ -87,18 +107,18 @@ export class TasksService {
   }
 
   async move(taskId: string, moveTaskDto: MoveTaskDto, userId: string): Promise<void> {
- 
+
     const { sourceColumnId, sourceTaskIds, destinationColumnId, destinationTaskIds } = moveTaskDto;
 
     // Primero, validamos que el usuario tiene permiso sobre el tablero.
     // Buscamos una de las columnas y a través de ella llegamos al tablero.
     const sourceColumn = await this.columnModel.findById(sourceColumnId).populate('board');
     if (!sourceColumn) {
-        throw new NotFoundException(`Columna de origen con ID "${sourceColumnId}" no encontrada.`);
+      throw new NotFoundException(`Columna de origen con ID "${sourceColumnId}" no encontrada.`);
     }
     const board = sourceColumn.board as unknown as Board;
     if (board.owner.toString() !== userId) {
-        throw new UnauthorizedException('No tienes permiso para mover tareas en este tablero.');
+      throw new UnauthorizedException('No tienes permiso para mover tareas en este tablero.');
     }
 
     // Caso 1: La tarea se mueve dentro de la misma columna.
@@ -125,7 +145,7 @@ export class TasksService {
   }
 
 
-async assignUsers(taskId: string, assignUsersDto: AssignUsersDto, userId: string): Promise<Task> {
+  async assignUsers(taskId: string, assignUsersDto: AssignUsersDto, userId: string): Promise<Task> {
     const task = await this.taskModel.findById(taskId).populate({
       path: 'column',
       populate: {
@@ -158,5 +178,5 @@ async assignUsers(taskId: string, assignUsersDto: AssignUsersDto, userId: string
     return task.save();
   }
 
-  
+
 }

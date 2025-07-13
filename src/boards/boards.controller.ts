@@ -6,7 +6,8 @@ import { CreateBoardDto } from './dto/create-board.dto';
 import { UpdateBoardDto } from './dto/update-board.dto';
 import { AuthGuard } from '@nestjs/passport';
 import { UpdateColumnOrderDto } from './dto/update-column-order.dto';
-import { AddMemberDto } from './dto/add-member.dto';
+import { AddMembersDto } from './dto/add-members.dto'; // Importar el nuevo DTO
+
 
 @UseGuards(AuthGuard('jwt'))
 @Controller('boards')
@@ -59,14 +60,14 @@ export class BoardsController {
   }
 
 
-  @Post(':id/members')
+   @Post(':id/members')
   addMember(
-    @Param('id') id: string,
-    @Body() addMemberDto: AddMemberDto,
+    @Param('id') boardId: string,
+    @Body() addMembersDto: AddMembersDto,
     @Request() req
   ) {
     const userId = req.user._id.toString();
-    return this.boardsService.addMember(id, addMemberDto.email);
+    return this.boardsService.addMembers(boardId, addMembersDto.emails, userId);
   }
 
 }

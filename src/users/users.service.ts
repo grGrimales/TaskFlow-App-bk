@@ -8,7 +8,7 @@ import { CreateUserDto } from './dto/create-user.dto';
 
 @Injectable()
 export class UsersService {
-  constructor(@InjectModel(User.name) private userModel: Model<User>) {}
+  constructor(@InjectModel(User.name) private userModel: Model<User>) { }
 
   async create(createUserDto: CreateUserDto): Promise<User> {
     const { password, ...userData } = createUserDto;
@@ -25,4 +25,29 @@ export class UsersService {
   async findOneByEmail(email: string): Promise<User | null> {
     return this.userModel.findOne({ email }).exec();
   }
+  async search(query: string, currentUserId: string): Promise<User[]> {
+    const regex = new RegExp(query, 'i'); // Búsqueda "case-insensitive"
+
+    return this.userModel.find({
+      _id: { $ne: currentUserId }, // Excluir al usuario actual de los resultados
+      $or: [{ name: regex }, { email: regex }],
+    })
+      .limit(10) // Limitar a 10 resultados para no sobrecargar
+      .select('name email') // Devolver solo los campos necesarios
+      .exec();
+  }
+
+
+  async setCurrentRefreshToken(userId: string, refreshToken: string) {
+    await this.userModel.findByIdAndUpdate(userId, {
+      currentHashedRefreshToken: refreshToken,
+    });
+  }
+
+
+  async findOneById(id: string): Promise<User | null> { // <-- CORRECCIÓN AQUÍ
+    return this.userModel.findById(id).exec();
+  }
+
+
 }

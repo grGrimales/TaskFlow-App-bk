@@ -1,4 +1,3 @@
-// src/tasks/tasks.controller.ts
 import { Controller, Get, Post, Body, Patch, Param, Delete, UseGuards, Request } from '@nestjs/common';
 import { TasksService } from './tasks.service';
 import { CreateTaskDto } from './dto/create-task.dto';
@@ -6,8 +5,9 @@ import { UpdateTaskDto } from './dto/update-task.dto';
 import { AuthGuard } from '@nestjs/passport';
 import { MoveTaskDto } from './dto/move-task.dto';
 import { AssignUsersDto } from './dto/assign-users.dto';
+import { CreateChecklistItemDto } from './dto/create-checklist-item.dto';
+import { UpdateChecklistItemDto } from './dto/update-checklist-item.dto';
 
-// Controlador para crear tareas dentro de una columna específica
 @UseGuards(AuthGuard('jwt'))
 @Controller('columns/:columnId/tasks')
 export class TasksController {
@@ -24,7 +24,6 @@ export class TasksController {
   }
 }
 
-// Controlador para acciones sobre tareas específicas (actualizar, eliminar)
 @UseGuards(AuthGuard('jwt'))
 @Controller('tasks')
 export class TaskActionsController {
@@ -67,6 +66,31 @@ export class TaskActionsController {
   ) {
     const userId = req.user._id.toString();
     return this.tasksService.assignUsers(id, assignUsersDto, userId);
+  }
+
+   @Post(':taskId/checklist')
+  addChecklistItem(
+    @Param('taskId') taskId: string,
+    @Body() createDto: CreateChecklistItemDto,
+  ) {
+    return this.tasksService.addChecklistItem(taskId, createDto);
+  }
+
+  @Patch(':taskId/checklist/:itemId')
+  updateChecklistItem(
+    @Param('taskId') taskId: string,
+    @Param('itemId') itemId: string,
+    @Body() updateDto: UpdateChecklistItemDto,
+  ) {
+    return this.tasksService.updateChecklistItem(taskId, itemId, updateDto);
+  }
+
+  @Delete(':taskId/checklist/:itemId')
+  removeChecklistItem(
+    @Param('taskId') taskId: string,
+    @Param('itemId') itemId: string,
+  ) {
+    return this.tasksService.removeChecklistItem(taskId, itemId);
   }
 
 }

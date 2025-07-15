@@ -1,4 +1,3 @@
-// src/tasks/schemas/task.schema.ts
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
 import { Document, Schema as MongooseSchema } from 'mongoose';
 import { Column } from '../../columns/schemas/column.schema';
@@ -11,6 +10,18 @@ export enum Priority {
   MEDIA = 'Media',
   ALTA = 'Alta',
 }
+
+
+@Schema({ _id: true }) 
+export class ChecklistItem {
+  @Prop({ required: true })
+  title: string;
+
+  @Prop({ required: true, default: false })
+  completed: boolean;
+}
+export const ChecklistItemSchema = SchemaFactory.createForClass(ChecklistItem);
+
 
 
 @Schema({ timestamps: true })
@@ -28,20 +39,26 @@ export class Task extends Document {
   assignedUsers: User[];
 
   @Prop({ type: Date, required: false })
-  dueDate: Date; // Fecha de vencimiento
+  dueDate: Date; 
 
   @Prop({
     type: String,
-    enum: Object.values(Priority), // Usar el enum que definimos
+    enum: Object.values(Priority),
     default: Priority.MEDIA
   })
-  priority: Priority; // Prioridad de la tarea
-  
+  priority: Priority; 
+
 @Prop({
     type: [{ type: MongooseSchema.Types.ObjectId, ref: 'Label' }],
     default: [],
   })
   labels: Label[];
+
+    @Prop({ type: [ChecklistItemSchema], default: [] })
+  checklist: ChecklistItem[];
 }
 
+
+
 export const TaskSchema = SchemaFactory.createForClass(Task);
+

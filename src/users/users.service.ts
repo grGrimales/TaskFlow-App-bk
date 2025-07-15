@@ -1,4 +1,3 @@
-// src/users/users.service.ts
 import { Injectable } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
@@ -26,14 +25,14 @@ export class UsersService {
     return this.userModel.findOne({ email }).exec();
   }
   async search(query: string, currentUserId: string): Promise<User[]> {
-    const regex = new RegExp(query, 'i'); // Búsqueda "case-insensitive"
+    const regex = new RegExp(query, 'i'); 
 
     return this.userModel.find({
-      _id: { $ne: currentUserId }, // Excluir al usuario actual de los resultados
+      _id: { $ne: currentUserId }, 
       $or: [{ name: regex }, { email: regex }],
     })
-      .limit(10) // Limitar a 10 resultados para no sobrecargar
-      .select('name email') // Devolver solo los campos necesarios
+      .limit(10)
+      .select('name email')
       .exec();
   }
 
@@ -45,7 +44,7 @@ export class UsersService {
   }
 
 
-  async findOneById(id: string): Promise<User | null> { // <-- CORRECCIÓN AQUÍ
+  async findOneById(id: string): Promise<User | null> {
     return this.userModel.findById(id).exec();
   }
 

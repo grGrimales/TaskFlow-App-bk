@@ -1,4 +1,3 @@
-// src/tasks/tasks.service.ts
 import { Injectable, NotFoundException, UnauthorizedException } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
@@ -9,6 +8,8 @@ import { CreateTaskDto } from './dto/create-task.dto';
 import { UpdateTaskDto } from './dto/update-task.dto';
 import { MoveTaskDto } from './dto/move-task.dto';
 import { AssignUsersDto } from './dto/assign-users.dto';
+import { CreateChecklistItemDto } from './dto/create-checklist-item.dto';
+import { UpdateChecklistItemDto } from './dto/update-checklist-item.dto';
 
 @Injectable()
 export class TasksService {
@@ -45,12 +46,11 @@ export class TasksService {
   async update(taskId: string, updateTaskDto: UpdateTaskDto, userId: string): Promise<Task> {
     const task = await this.taskModel.findById(taskId).populate({
       path: 'column',
-      select: 'board', // Solo necesitamos el ID del tablero
+      select: 'board', 
       populate: {
-        // labels
         path: 'board',
         model: 'Board',
-        select: 'owner members' // Traemos al dueño y a los miembros
+        select: 'owner members' 
       },
       
       
@@ -61,7 +61,6 @@ export class TasksService {
       throw new NotFoundException(`Tarea con ID "${taskId}" no encontrada.`);
     }
 
-    // Lógica de permisos mejorada
     const board = (task.column as any)?.board;
     if (!board) {
       throw new NotFoundException('El tablero asociado a esta tarea no fue encontrado.');
@@ -73,7 +72,6 @@ export class TasksService {
       throw new UnauthorizedException('No tienes permiso para modificar esta tarea.');
     }
 
-    // Esta es la línea clave. Actualiza la tarea con todos los datos del DTO.
     const updatedTask = await this.taskModel.findByIdAndUpdate(taskId, updateTaskDto, { new: true }).exec();
     
 
@@ -110,8 +108,7 @@ export class TasksService {
 
     const { sourceColumnId, sourceTaskIds, destinationColumnId, destinationTaskIds } = moveTaskDto;
 
-    // Primero, validamos que el usuario tiene permiso sobre el tablero.
-    // Buscamos una de las columnas y a través de ella llegamos al tablero.
+  
     const sourceColumn = await this.columnModel.findById(sourceColumnId).populate('board');
     if (!sourceColumn) {
       throw new NotFoundException(`Columna de origen con ID "${sourceColumnId}" no encontrada.`);
@@ -128,7 +125,6 @@ export class TasksService {
       });
     } else {
       // Caso 2: La tarea se mueve a una columna diferente.
-      // Usamos Promise.all para ejecutar las actualizaciones en paralelo.
       await Promise.all([
         // 1. Actualizar la columna de origen.
         this.columnModel.findByIdAndUpdate(sourceColumnId, {
@@ -159,7 +155,6 @@ export class TasksService {
     }
 
     const board = (task.column as any)?.board;
-    // Verificamos que el usuario que hace la petición sea el dueño del tablero
     if (!board || board.owner.toString() !== userId) {
       throw new UnauthorizedException('No tienes permiso para modificar esta tarea.');
     }
@@ -174,9 +169,49 @@ export class TasksService {
       throw new UnauthorizedException('Solo puedes asignar tareas a miembros del tablero.');
     }
 
-    task.assignedUsers = userIds as any; // Usamos 'as any' para evitar problemas de tipo con Mongoose
+    task.assignedUsers = userIds as any; 
     return task.save();
   }
 
+
+    async addChecklistItem(taskId: string, createDto: CreateChecklistItemDto): Promise<Task> {
+    const task = await this.taskModel.findByIdAndUpdate(
+      taskId,
+      { $push: { checklist: createDto } }, // $push añade el nuevo item al array
+      { new: true }, // Devuelve el documento actualizado
+    ).populate('labels checklist'); // Populamos para devolver todo completo
+    
+    if (!task) {
+      throw new NotFoundException(`Tarea con ID "${taskId}" no encontrada.`);
+    }
+    return task;
+  }
+
+
+    async updateChecklistItem(taskId: string, itemId: string, updateDto: UpdateChecklistItemDto): Promise<Task> {
+    const task = await this.taskModel.findOneAndUpdate(
+      { _id: taskId, 'checklist._id': itemId }, 
+      { $set: { 'checklist.$.completed': updateDto.completed } }, 
+      { new: true },
+    ).populate('labels checklist');
+
+    if (!task) {
+      throw new NotFoundException(`Sub-tarea con ID "${itemId}" no encontrada en la tarea "${taskId}".`);
+    }
+    return task;
+  }
+
+    async removeChecklistItem(taskId: string, itemId: string): Promise<Task> {
+    const task = await this.taskModel.findByIdAndUpdate(
+      taskId,
+      { $pull: { checklist: { _id: itemId } } }, 
+      { new: true },
+    ).populate('labels checklist');
+    
+    if (!task) {
+      throw new NotFoundException(`Tarea con ID "${taskId}" no encontrada.`);
+    }
+    return task;
+  }
 
 }

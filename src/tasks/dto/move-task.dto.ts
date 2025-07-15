@@ -1,4 +1,3 @@
-// src/tasks/dto/move-task.dto.ts
 import { IsMongoId, IsArray } from 'class-validator';
 
 export class MoveTaskDto {

@@ -1,4 +1,3 @@
-// src/columns/schemas/column.schema.ts
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
 import { Document, Schema as MongooseSchema } from 'mongoose';
 import { Board } from '../../boards/schemas/board.schema';
@@ -12,7 +11,6 @@ export class Column extends Document {
   @Prop({ type: MongooseSchema.Types.ObjectId, ref: 'Board', required: true })
   board: Board;
 
-   // --- AÑADIR ESTA LÍNEA ---
   @Prop([{ type: MongooseSchema.Types.ObjectId, ref: 'Task' }])
   tasks: Task[];
 }

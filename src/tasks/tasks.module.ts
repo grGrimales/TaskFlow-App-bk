@@ -1,7 +1,5 @@
-// src/tasks/tasks.module.ts
 import { Module } from '@nestjs/common';
 import { TasksService } from './tasks.service';
-// Importar ambos controladores
 import { TasksController, TaskActionsController } from './tasks.controller';
 import { MongooseModule } from '@nestjs/mongoose';
 import { Task, TaskSchema } from './schemas/task.schema';
@@ -18,7 +16,6 @@ import { LabelsModule } from 'src/labels/labels.module';
     ]),
     LabelsModule
   ],
-  // Registrar ambos controladores
   controllers: [TasksController, TaskActionsController],
   providers: [TasksService],
 })

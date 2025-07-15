@@ -1,4 +1,3 @@
-// src/columns/dto/create-column.dto.ts
 import { IsNotEmpty, IsString, MaxLength } from 'class-validator';
 
 export class CreateColumnDto {

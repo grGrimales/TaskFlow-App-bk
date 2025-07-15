@@ -1,4 +1,3 @@
-// src-backend/comments/comments.service.ts
 
 import { Injectable } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
@@ -19,15 +18,14 @@ export class CommentsService {
       task: taskId,
     });
     const savedComment = await newComment.save();
-    // Populate author details before returning
     return savedComment.populate('author', 'name email');
   }
 
   async findAllByTask(taskId: string): Promise<Comment[]> {
     return this.commentModel
       .find({ task: taskId })
-      .populate('author', 'name email') // Trae los datos del autor
-      .sort({ createdAt: 'asc' }) // Ordena del más antiguo al más nuevo
+      .populate('author', 'name email') 
+      .sort({ createdAt: 'asc' }) 
       .exec();
   }
 }

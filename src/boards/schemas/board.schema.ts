@@ -1,8 +1,7 @@
-// src/boards/schemas/board.schema.ts
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
 import { Document, Schema as MongooseSchema } from 'mongoose';
 import { User } from '../../users/schemas/user.schema';
-import { Column } from '../../columns/schemas/column.schema'; // <-- Importar
+import { Column } from '../../columns/schemas/column.schema'; 
 
 @Schema({ timestamps: true })
 export class Board extends Document {

@@ -1,4 +1,3 @@
-// src-backend/labels/dto/create-label.dto.ts
 import { IsString, IsNotEmpty, IsOptional } from 'class-validator';
 
 export class CreateLabelDto {
@@ -11,6 +10,6 @@ export class CreateLabelDto {
   color: string;
 
     @IsString()
-  @IsOptional() // Hacemos que sea opcional aquí, pero la asignaremos en el servicio.
+  @IsOptional() 
   board?: string;
 }

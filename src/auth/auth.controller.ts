@@ -1,4 +1,3 @@
-// src/auth/auth.controller.ts
 import { Body, Controller, Post, HttpCode, HttpStatus, UseGuards, Get, Request  } from '@nestjs/common';
 import { AuthService } from './auth.service';
 import { SignUpDto } from './dto/signup.dto';
@@ -21,11 +20,9 @@ export class AuthController {
     return this.authService.signIn(signInDto);
   }
 
-  // ... dentro de la clase AuthController
-@UseGuards(AuthGuard('jwt')) // ¡Así se protege una ruta!
+@UseGuards(AuthGuard('jwt')) 
 @Get('profile')
 getProfile(@Request() req) {
-  // Gracias a la estrategia JWT, req.user contiene los datos del usuario
   return req.user;
 }
 

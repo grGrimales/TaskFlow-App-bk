@@ -1,11 +1,10 @@
-// src-backend/labels/labels.controller.ts
 import { Controller, Get, Post, Body, Param, UseGuards } from '@nestjs/common';
 import { LabelsService } from './labels.service';
 import { CreateLabelDto } from './dto/create-label.dto';
 import { AuthGuard } from '@nestjs/passport';
 
 @UseGuards(AuthGuard('jwt'))
-@Controller('boards/:boardId/labels') // Anidamos las rutas bajo los tableros
+@Controller('boards/:boardId/labels') 
 export class LabelsController {
   constructor(private readonly labelsService: LabelsService) {}
 

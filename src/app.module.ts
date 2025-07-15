@@ -1,4 +1,3 @@
-// src/app.module.ts
 import { Module } from '@nestjs/common';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { MongooseModule } from '@nestjs/mongoose';
@@ -14,7 +13,7 @@ import { LabelsModule } from './labels/labels.module';
 @Module({
   imports: [
     ConfigModule.forRoot({
-      isGlobal: true, // Hace que las variables de entorno estén disponibles en toda la app
+      isGlobal: true, 
     }),
     MongooseModule.forRootAsync({
       imports: [ConfigModule],

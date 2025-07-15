@@ -1,4 +1,3 @@
-// src/boards/boards.module.ts
 import { Module } from '@nestjs/common';
 import { BoardsService } from './boards.service';
 import { BoardsController } from './boards.controller';

@@ -1,9 +1,8 @@
-// src/users/users.controller.ts
 import { Controller, Get, Query, UseGuards, Request } from '@nestjs/common';
 import { AuthGuard } from '@nestjs/passport';
 import { UsersService } from './users.service';
 
-@UseGuards(AuthGuard('jwt')) // Proteger todas las rutas del controlador
+@UseGuards(AuthGuard('jwt')) 
 @Controller('users')
 export class UsersController {
     constructor(private readonly usersService: UsersService) {}

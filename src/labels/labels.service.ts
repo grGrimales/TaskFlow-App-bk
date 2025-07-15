@@ -1,4 +1,3 @@
-// src-backend/labels/labels.service.ts
 import { Injectable } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
@@ -22,9 +21,7 @@ export class LabelsService {
     return createdLabel.save();
   }
 
-   // --- 2. Hacemos que este método devuelva siempre nuestra lista ---
   async findAllByBoard(boardId: string): Promise<Label[]> {
-    // En lugar de buscar en la base de datos, devolvemos la lista estática.
     return Promise.resolve(HARDCODED_LABELS);
   }
 

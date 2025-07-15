@@ -1,4 +1,3 @@
-// src/boards/boards.service.ts
 import { Injectable, NotFoundException, UnauthorizedException, BadRequestException } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { Board } from './schemas/board.schema';
@@ -6,7 +5,7 @@ import { CreateBoardDto } from './dto/create-board.dto';
 import { UpdateBoardDto } from './dto/update-board.dto';
 import { UpdateColumnOrderDto } from './dto/update-column-order.dto';
 import { UsersService } from 'src/users/users.service';
-import { User } from '../users/schemas/user.schema'; // 1. Importa el modelo de User
+import { User } from '../users/schemas/user.schema';
 import { Model, Types } from 'mongoose'; 
 
 @Injectable()
@@ -21,7 +20,7 @@ export class BoardsService {
 
     const newBoard = new this.boardModel({
       ...createBoardDto,
-      owner: user._id, // El creador sigue siendo el dueño
+      owner: user._id, 
       members: [user._id] 
     });
     return newBoard.save();
@@ -31,7 +30,7 @@ export class BoardsService {
     return this.boardModel.find({ owner: ownerId }).exec();
   }
 
-async findOne(id: string, userId: string): Promise<Board> { // Parámetro renombrado
+async findOne(id: string, userId: string): Promise<Board> { 
   const board = await this.boardModel.findById(id)
     .populate({
       path: 'columns',
@@ -51,7 +50,6 @@ async findOne(id: string, userId: string): Promise<Board> { // Parámetro renomb
     throw new NotFoundException(`Tablero con ID "${id}" no encontrado.`);
   }
 
-  // CORRECCIÓN: Permitir acceso si el usuario es el dueño O un miembro.
   const isOwner = board.owner.toString() === userId;
   const isMember = board.members.some(member => (member as any)._id.toString() === userId);
 
@@ -118,12 +116,10 @@ async updateColumnOrder(id: string, updateColumnOrderDto: UpdateColumnOrderDto, 
 
     const memberIds = board.members.map(id => id.toString());
     
-    // <<-- 2. AÑADE EL TIPO EXPLÍCITO AL ARRAY
     const newMemberIds: Types.ObjectId[] = [];
 
     for (const user of usersToAdd) {
         if (!memberIds.includes(user._id.toString())) {
-            // Ahora esto funcionará sin errores.
             newMemberIds.push(user._id);
         }
     }
@@ -132,7 +128,7 @@ async updateColumnOrder(id: string, updateColumnOrderDto: UpdateColumnOrderDto, 
         throw new BadRequestException('Todos los usuarios seleccionados ya son miembros de este tablero.');
     }
 
-    board.members.push(...newMemberIds as any); // Usamos 'as any' aquí porque Mongoose puede ser estricto
+    board.members.push(...newMemberIds as any); 
     await board.save();
     
     return board.populate<{ members: User[] }>('members');

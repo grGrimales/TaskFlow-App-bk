@@ -1,11 +1,10 @@
-// src/columns/columns.service.ts
 import { Injectable, NotFoundException, UnauthorizedException } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
 import { Column } from './schemas/column.schema';
 import { Board } from '../boards/schemas/board.schema';
 import { CreateColumnDto } from './dto/create-column.dto';
-import { Label } from '../labels/schemas/label.schema'; // <-- AÑADIR ESTA LÍNEA
+import { Label } from '../labels/schemas/label.schema'; 
 
 
 @Injectable()
@@ -16,14 +15,12 @@ export class ColumnsService {
     @InjectModel(Label.name) private labelModel: Model<Label>
   ) { }
 
-  // Método auxiliar para verificar la propiedad del tablero
   private async checkBoardOwnership(boardId: string, userId: string): Promise<Board> {
     const board = await this.boardModel.findById(boardId);
     if (!board) {
       throw new NotFoundException(`Tablero con ID "${boardId}" no encontrado.`);
     }
 
-    // CORRECCIÓN: Permitir acceso si el usuario es el dueño O un miembro.
     const isOwner = board.owner.toString() === userId;
     const isMember = board.members.some(memberId => memberId.toString() === userId);
 
@@ -76,7 +73,7 @@ async findAllForBoard(boardId: string, userId: string): Promise<Column[]> {
       throw new NotFoundException(`Tablero con ID "${boardId}" no encontrado.`);
     }
 
-    // Filtro de seguridad en el backend
+    // Filtro de seguridad 
     boardWithData.columns.forEach(column => {
         column.tasks.forEach(task => {
             if (task.labels) {
@@ -106,7 +103,6 @@ async findAllForBoard(boardId: string, userId: string): Promise<Column[]> {
 
     const updatedColumn = await this.columnModel.findByIdAndUpdate(columnId, updateColumnDto, { new: true }).exec();
 
-    // AÑADIMOS ESTA VALIDACIÓN para satisfacer a TypeScript
     if (!updatedColumn) {
       throw new NotFoundException(`Columna con ID "${columnId}" no encontrada durante la actualización.`);
     }

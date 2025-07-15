@@ -1,4 +1,3 @@
-// src/users/users.module.ts
 import { Module } from '@nestjs/common';
 import { MongooseModule } from '@nestjs/mongoose';
 import { User, UserSchema } from './schemas/user.schema';
@@ -11,6 +10,6 @@ import { UsersController } from './users.controller';
   ],
     controllers: [UsersController],
   providers: [UsersService],
-  exports: [UsersService,MongooseModule], // ¡Importante! Exportamos el servicio para usarlo en AuthModule
+  exports: [UsersService,MongooseModule], 
 })
 export class UsersModule {}

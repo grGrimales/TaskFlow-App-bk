@@ -28,7 +28,7 @@ export class AuthService {
     return { access_token: token };
   }
 
-  async signIn(signInDto: SignInDto): Promise<{ access_token: string }> {
+  async signIn(signInDto: SignInDto): Promise<{ access_token: string, userName: string }> {
     const user = await this.usersService.findOneByEmail(signInDto.email);
 
     
@@ -43,7 +43,8 @@ export class AuthService {
 
     const payload = { sub: user._id, email: user.email, roles: user.roles };
     const token = await this.jwtService.signAsync(payload);
-    return { access_token: token };
+    console.log('user', user);
+    return { access_token: token, userName: user.name };
   }
 
   async validateUser(email: string, pass: string): Promise<any> {
@@ -59,7 +60,6 @@ export class AuthService {
   async login(user: any) {
     const payload = { email: user.email, sub: user._id };
 
-    // Generamos ambos tokens
     const [accessToken, refreshToken] = await Promise.all([
       this.jwtService.sign(payload, {
         secret: this.configService.get<string>('JWT_SECRET'),
@@ -71,14 +71,20 @@ export class AuthService {
       }),
     ]);
 
-    // Guardamos el hash del refresh token en el usuario (para mayor seguridad)
     const salt = await bcrypt.genSalt();
     const hashedRefreshToken = await bcrypt.hash(refreshToken, salt);
     await this.usersService.setCurrentRefreshToken(user._id, hashedRefreshToken);
 
+
+
     return {
       access_token: accessToken,
       refresh_token: refreshToken,
+       user: {
+          id: user._id,
+          name: user.name, 
+          email: user.email,
+      },
     };
   }
 
